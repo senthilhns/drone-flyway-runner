@@ -5,32 +5,28 @@
 package plugin
 
 import (
-	"encoding/base64"
-	"encoding/json"
-	"io"
-	"io/ioutil"
+	"github.com/sirupsen/logrus"
 	"os"
 )
 
-func writeCard(path, schema string, card interface{}) {
-	data, _ := json.Marshal(map[string]interface{}{
-		"schema": schema,
-		"data":   card,
-	})
-	switch {
-	case path == "/dev/stdout":
-		writeCardTo(os.Stdout, data)
-	case path == "/dev/stderr":
-		writeCardTo(os.Stderr, data)
-	case path != "":
-		ioutil.WriteFile(path, data, 0644)
+func LogPrintln(args ...interface{}) {
+
+	if !IsDevTestingMode() {
+		return
 	}
+
+	logrus.Println(append([]interface{}{"Plugin Info:"}, args...)...)
 }
 
-func writeCardTo(out io.Writer, data []byte) {
-	encoded := base64.StdEncoding.EncodeToString(data)
-	io.WriteString(out, "\u001B]1338;")
-	io.WriteString(out, encoded)
-	io.WriteString(out, "\u001B]0m")
-	io.WriteString(out, "\n")
+func LogPrintf(format string, v ...interface{}) {
+
+	if !IsDevTestingMode() {
+		return
+	}
+
+	logrus.Printf(format, v...)
+}
+
+func IsDevTestingMode() bool {
+	return os.Getenv("DEV_TEST_d6c9b463090c") == "true"
 }

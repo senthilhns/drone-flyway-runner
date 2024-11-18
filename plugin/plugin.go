@@ -6,20 +6,66 @@ package plugin
 
 import "context"
 
-// Args provides plugin execution arguments.
 type Args struct {
 	Pipeline
-
-	// Level defines the plugin log level.
+	FlywayEnvPluginArgs
 	Level string `envconfig:"PLUGIN_LOG_LEVEL"`
-
-	// TODO replace or remove
-	Param1 string `envconfig:"PLUGIN_PARAM1"`
-	Param2 string `envconfig:"PLUGIN_PARAM2"`
 }
 
-// Exec executes the plugin.
-func Exec(ctx context.Context, args Args) error {
-	// write code here
-	return nil
+type FlywayEnvPluginArgs struct {
+	PluginDriverPath      string `envconfig:"PLUGIN_DRIVER_PATH"`
+	PluginFlywayCommand   string `envconfig:"PLUGIN_FLYWAY_COMMAND"`
+	PluginLocations       string `envconfig:"PLUGIN_LOCATIONS"`
+	PluginCommandLineArgs string `envconfig:"PLUGIN_COMMAND_LINE_ARGS"`
+	PluginUrl             string `envconfig:"PLUGIN_URL"`
+	PluginUser            string `envconfig:"PLUGIN_USER"`
+	PluginPassword        string `envconfig:"PLUGIN_PASSWORD"`
+}
+
+type FlywayPlugin struct {
+	InputArgs         *Args
+	IsMultiFileUpload bool
+	PluginProcessingInfo
+}
+
+type PluginProcessingInfo struct {
+}
+
+func GetNewPlugin(ctx context.Context, args Args) (FlywayPlugin, error) {
+	return FlywayPlugin{}, nil
+}
+
+func Exec(ctx context.Context, args Args) (FlywayPlugin, error) {
+	plugin, err := GetNewPlugin(ctx, args)
+	if err != nil {
+		return plugin, err
+	}
+
+	err = plugin.Init(&args)
+	if err != nil {
+		return plugin, err
+	}
+	defer func(p FlywayPlugin) {
+		err := p.DeInit()
+		if err != nil {
+			LogPrintln("Error in DeInit: " + err.Error())
+		}
+	}(plugin)
+
+	err = plugin.ValidateAndProcessArgs(args)
+	if err != nil {
+		return plugin, err
+	}
+
+	err = plugin.DoPostArgsValidationSetup(args)
+	if err != nil {
+		return plugin, err
+	}
+
+	err = plugin.Run()
+	if err != nil {
+		return plugin, err
+	}
+
+	return plugin, nil
 }
