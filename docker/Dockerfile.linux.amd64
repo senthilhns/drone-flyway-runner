@@ -24,6 +24,7 @@ ENV GODEBUG=netdns=go
 ENV FLYWAY_VERSION=10.21.0
 ENV FLYWAY_DIR=/opt/flyway-${FLYWAY_VERSION}
 ENV PATH="${FLYWAY_DIR}:${PATH}"
+ENV FLYWAY_BIN_PATH=${FLYWAY_DIR}/flyway
 
 # Copy certificates from the alpine stage
 COPY --from=alpine /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/

@@ -30,3 +30,7 @@ func LogPrintf(format string, v ...interface{}) {
 func IsDevTestingMode() bool {
 	return os.Getenv("DEV_TEST_d6c9b463090c") == "true"
 }
+
+func GetFlywayExecutablePath() string {
+	return os.Getenv("FLYWAY_BIN_PATH")
+}

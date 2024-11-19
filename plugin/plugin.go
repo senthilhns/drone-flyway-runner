@@ -25,10 +25,10 @@ type FlywayEnvPluginArgs struct {
 type FlywayPlugin struct {
 	InputArgs         *Args
 	IsMultiFileUpload bool
-	PluginProcessingInfo
+	ProcessingInfo
 }
 
-type PluginProcessingInfo struct {
+type ProcessingInfo struct {
 }
 
 func GetNewPlugin(ctx context.Context, args Args) (FlywayPlugin, error) {

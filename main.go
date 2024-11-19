@@ -8,7 +8,7 @@ import (
 	"context"
 	"fmt"
 
-	"harness-community/drone-flyway-runner/plugin"
+	plg "harness-community/drone-flyway-runner/plugin"
 
 	"github.com/kelseyhightower/envconfig"
 	"github.com/sirupsen/logrus"
@@ -17,10 +17,10 @@ import (
 func main() {
 
 	fmt.Println("Running flyway plugin")
-
+	fmt.Println(plg.GetFlywayExecutablePath())
 	logrus.SetFormatter(new(formatter))
 
-	var args plugin.Args
+	var args plg.Args
 	if err := envconfig.Process("", &args); err != nil {
 		logrus.Fatalln(err)
 	}
@@ -34,7 +34,7 @@ func main() {
 		logrus.SetLevel(logrus.TraceLevel)
 	}
 
-	if _, err := plugin.Exec(context.Background(), args); err != nil {
+	if _, err := plg.Exec(context.Background(), args); err != nil {
 		logrus.Fatalln(err)
 	}
 }
