@@ -1,12 +1,12 @@
-# Base image for certificates
-FROM alpine:3.6 AS alpine
-RUN apk add -U --no-cache ca-certificates && update-ca-certificates
+# Base stage for certificates
+FROM alpine:3.17 as alpine
+RUN apk add -U --no-cache ca-certificates
 
 # Builder stage for Flyway installation
-FROM alpine:3.6 AS builder
+FROM alpine:3.17 as builder
 
-# Install necessary tools for downloading and extracting Flyway
-RUN apk add --no-cache wget tar
+# Install tools required for downloading and extracting Flyway
+RUN apk add --no-cache wget tar openjdk17-jre
 
 # Define Flyway version and installation directory
 ENV FLYWAY_VERSION=10.21.0
@@ -19,7 +19,10 @@ RUN wget --no-check-certificate https://repo1.maven.org/maven2/org/flywaydb/flyw
     mv flyway-${FLYWAY_VERSION} ${FLYWAY_DIR}
 
 # Final image stage
-FROM alpine:3.6
+FROM alpine:3.17
+RUN apk add --no-cache openjdk17-jre
+
+# Set environment variables
 ENV GODEBUG=netdns=go
 ENV FLYWAY_VERSION=10.21.0
 ENV FLYWAY_DIR=/opt/flyway-${FLYWAY_VERSION}

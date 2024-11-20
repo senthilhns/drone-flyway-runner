@@ -4,7 +4,11 @@
 
 package plugin
 
-import "context"
+import (
+	"context"
+	"encoding/json"
+	"log"
+)
 
 type Args struct {
 	Pipeline
@@ -18,7 +22,7 @@ type FlywayEnvPluginArgs struct {
 	PluginLocations       string `envconfig:"PLUGIN_LOCATIONS"`
 	PluginCommandLineArgs string `envconfig:"PLUGIN_COMMAND_LINE_ARGS"`
 	PluginUrl             string `envconfig:"PLUGIN_URL"`
-	PluginUser            string `envconfig:"PLUGIN_USER"`
+	PluginUser            string `envconfig:"PLUGIN_USERNAME"`
 	PluginPassword        string `envconfig:"PLUGIN_PASSWORD"`
 }
 
@@ -28,7 +32,18 @@ type FlywayPlugin struct {
 	ProcessingInfo
 }
 
+func (a *Args) ToStr() string {
+	jsonData, err := json.MarshalIndent(a, "", "  ")
+	if err != nil {
+		log.Printf("Error marshalling Args to JSON: %v", err)
+		return ""
+	}
+	return string(jsonData)
+}
+
 type ProcessingInfo struct {
+	IsDryRun    bool
+	ExecCommand string
 }
 
 func GetNewPlugin(ctx context.Context, args Args) (FlywayPlugin, error) {

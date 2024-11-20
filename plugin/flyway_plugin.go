@@ -23,3 +23,11 @@ func (p *FlywayPlugin) DoPostArgsValidationSetup(args Args) error {
 func (p *FlywayPlugin) Run() error {
 	return nil
 }
+
+const (
+	MigrateCommand  = "migrate"
+	CleanCommand    = "clean"
+	BaselineCommand = "baseline"
+	RepairCommand   = "repair"
+	ValidateCommand = "validate"
+)
