@@ -5,6 +5,8 @@ RUN apk add -U --no-cache ca-certificates && update-ca-certificates
 # Builder stage for Flyway installation
 FROM alpine:3.6 AS builder
 
+RUN apk add --no-cache bash
+
 # Install necessary tools for downloading and extracting Flyway
 RUN apk add --no-cache wget tar
 

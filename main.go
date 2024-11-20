@@ -6,7 +6,6 @@ package main
 
 import (
 	"context"
-	"fmt"
 	"harness-community/drone-flyway-runner/plugin"
 
 	"github.com/kelseyhightower/envconfig"
@@ -14,9 +13,6 @@ import (
 )
 
 func main() {
-
-	fmt.Println("Running flyway plugin")
-	fmt.Println(plugin.GetFlywayExecutablePath())
 	logrus.SetFormatter(new(formatter))
 
 	var args plugin.Args
