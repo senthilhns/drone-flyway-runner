@@ -171,6 +171,9 @@ func (p *FlywayPlugin) GetExecArgsStr() string {
 	if len(p.InputArgs.Password) > 0 {
 		execCommand += "-password=" + p.InputArgs.Password + " "
 	}
+	if len(p.InputArgs.Locations) > 0 {
+		execCommand += "-locations=" + p.InputArgs.Locations + " "
+	}
 
 	// this should be the last
 	execCommand += p.InputArgs.CommandLineArgs
