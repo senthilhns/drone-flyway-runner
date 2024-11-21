@@ -5,6 +5,7 @@
 package plugin
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -28,6 +29,7 @@ type FlywayEnvPluginArgs struct {
 	Url             string `envconfig:"PLUGIN_URL"`
 	UserName        string `envconfig:"PLUGIN_USERNAME"`
 	Password        string `envconfig:"PLUGIN_PASSWORD"`
+	IsDryRun        string `envconfig:"PLUGIN_IS_DRY_RUN"`
 }
 
 type FlywayPlugin struct {
@@ -46,17 +48,16 @@ func (a *Args) ToStr() string {
 }
 
 type ProcessingInfo struct {
-	IsDryRun            bool
 	ExecCommand         string
 	CommandSpecificArgs string
 }
 
-func GetNewPlugin(ctx context.Context, args Args) (FlywayPlugin, error) {
+func GetNewPlugin() (FlywayPlugin, error) {
 	return FlywayPlugin{}, nil
 }
 
 func Exec(ctx context.Context, args Args) (FlywayPlugin, error) {
-	plugin, err := GetNewPlugin(ctx, args)
+	plugin, err := GetNewPlugin()
 	if err != nil {
 		return plugin, err
 	}
@@ -122,22 +123,11 @@ func (p *FlywayPlugin) DoPostArgsValidationSetup(args Args) error {
 }
 
 func (p *FlywayPlugin) Run() error {
-	p.ExecCommand += GetFlywayExecutablePath() + " "
-	p.ExecCommand += p.InputArgs.FlywayCommand + " "
-	p.ExecCommand += p.CommandSpecificArgs + " "
+	var stdoutBuf, stderrBuf bytes.Buffer
+	p.ExecCommand = p.GetExecArgsStr()
 
-	if len(p.InputArgs.Url) > 0 {
-		p.ExecCommand += "-url=" + p.InputArgs.Url + " "
-	}
-	if len(p.InputArgs.UserName) > 0 {
-		p.ExecCommand += "-user=" + p.InputArgs.UserName + " "
-	}
-	if len(p.InputArgs.Password) > 0 {
-		p.ExecCommand += "-password=" + p.InputArgs.Password + " "
-	}
-	// this should be the last
-	p.ExecCommand += p.InputArgs.CommandLineArgs
-	if p.IsDryRun {
+	fmt.Println("Command: ", p.ExecCommand)
+	if p.InputArgs.IsDryRun == "TRUE" {
 		return nil
 	}
 
@@ -150,15 +140,42 @@ func (p *FlywayPlugin) Run() error {
 
 	cmd := exec.Command(cmdName, cmdArgs...)
 
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	cmd.Stdout = &stdoutBuf
+	cmd.Stderr = &stderrBuf
 
 	err := cmd.Run()
-	if err != nil {
-		fmt.Printf("Error executing new command: %v\n", err)
+	if err == nil {
+		fmt.Println(stdoutBuf.String())
+		fmt.Printf("Command execution success")
+	} else {
+		fmt.Println(stderrBuf.String())
+		fmt.Printf("Error executing command: %v\n", err.Error())
 	}
 
 	return nil
+}
+
+func (p *FlywayPlugin) GetExecArgsStr() string {
+	var execCommand string
+
+	execCommand += GetFlywayExecutablePath() + " "
+	execCommand += p.InputArgs.FlywayCommand + " "
+	execCommand += p.CommandSpecificArgs + " "
+
+	if len(p.InputArgs.Url) > 0 {
+		execCommand += "-url=" + p.InputArgs.Url + " "
+	}
+	if len(p.InputArgs.UserName) > 0 {
+		execCommand += "-user=" + p.InputArgs.UserName + " "
+	}
+	if len(p.InputArgs.Password) > 0 {
+		execCommand += "-password=" + p.InputArgs.Password + " "
+	}
+
+	// this should be the last
+	execCommand += p.InputArgs.CommandLineArgs
+
+	return execCommand
 }
 
 func (p *FlywayPlugin) IsCommandValid() error {
@@ -232,5 +249,5 @@ const (
 	BaselineCommand = "baseline"
 	RepairCommand   = "repair"
 	ValidateCommand = "validate"
-	ConfigFileOpt   = "-configFile"
+	ConfigFileOpt   = "-configFiles"
 )
