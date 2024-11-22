@@ -158,7 +158,12 @@ func (p *FlywayPlugin) Run() error {
 func (p *FlywayPlugin) GetExecArgsStr() string {
 	var execCommand string
 
+	if len(p.InputArgs.DriverPath) > 0 {
+		execCommand += "CLASSPATH=" + p.InputArgs.DriverPath + " "
+	}
+
 	execCommand += GetFlywayExecutablePath() + " "
+
 	execCommand += p.InputArgs.FlywayCommand + " "
 	execCommand += p.CommandSpecificArgs + " "
 
@@ -173,9 +178,6 @@ func (p *FlywayPlugin) GetExecArgsStr() string {
 	}
 	if len(p.InputArgs.Locations) > 0 {
 		execCommand += "-locations=" + p.InputArgs.Locations + " "
-	}
-	if len(p.InputArgs.DriverPath) > 0 {
-		execCommand += "-classpath=" + p.InputArgs.DriverPath + " "
 	}
 	// this should be the last
 	execCommand += p.InputArgs.CommandLineArgs
