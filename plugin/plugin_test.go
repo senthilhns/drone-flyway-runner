@@ -51,8 +51,8 @@ func TestFunctionalityCleanWithConfigFile(t *testing.T) {
 		getDefaultPluginUser(),     //  user
 		getDefaultPluginPassword()) // password
 
-		args.IsDryRun = true
-		fmt.Println(args.ToStr())
+	args.IsDryRun = "TRUE"
+	fmt.Println(args.ToStr())
 
 	fp, err := Exec(context.TODO(), args)
 	if err != nil {
