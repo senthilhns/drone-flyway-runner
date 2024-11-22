@@ -124,6 +124,8 @@ func (p *FlywayPlugin) DoPostArgsValidationSetup(args Args) error {
 
 func (p *FlywayPlugin) Run() error {
 	var stdoutBuf, stderrBuf bytes.Buffer
+	var err error
+
 	p.ExecCommand = p.GetExecArgsStr()
 
 	fmt.Println("Command: ", p.ExecCommand)
@@ -139,11 +141,13 @@ func (p *FlywayPlugin) Run() error {
 	cmdArgs := cmdParts[1:]
 
 	cmd := exec.Command(cmdName, cmdArgs...)
-
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
+	if len(p.InputArgs.DriverPath) > 0 {
+		cmd.Env = append(os.Environ(), "CLASSPATH="+p.InputArgs.DriverPath)
+	}
 
-	err := cmd.Run()
+	err = cmd.Run()
 	if err == nil {
 		fmt.Println(stdoutBuf.String())
 		fmt.Printf("Command execution success")
@@ -158,12 +162,7 @@ func (p *FlywayPlugin) Run() error {
 func (p *FlywayPlugin) GetExecArgsStr() string {
 	var execCommand string
 
-	if len(p.InputArgs.DriverPath) > 0 {
-		execCommand += "CLASSPATH=" + p.InputArgs.DriverPath + " "
-	}
-
 	execCommand += GetFlywayExecutablePath() + " "
-
 	execCommand += p.InputArgs.FlywayCommand + " "
 	execCommand += p.CommandSpecificArgs + " "
 
