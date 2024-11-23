@@ -11,14 +11,7 @@ import (
 	"testing"
 )
 
-func IsTestFunctionality() bool {
-	return os.Getenv("IS_TEST_FUNCTIONALITY") == "TRUE"
-}
-
-func TestFunctionalityCleanWithArgs(t *testing.T) {
-	if !IsTestFunctionality() {
-		return
-	}
+func TestUnitTcClean(t *testing.T) {
 	args := GetArgsForFunctionalTesting(
 		getDefaultPluginDriverPath(),
 		"clean",
@@ -26,80 +19,118 @@ func TestFunctionalityCleanWithArgs(t *testing.T) {
 		getDefaultPluginCommandLineArgs(),
 		getDefaultPluginUrl(),
 		getDefaultPluginUser(),
-		getDefaultPluginPassword())
-
-	fmt.Println(args.ToStr())
-
-	fp, err := Exec(context.TODO(), args)
-	if err != nil {
-		fmt.Println("Error in Exec: " + err.Error())
-		t.Fail()
-	}
-	_ = fp
-}
-
-func TestFunctionalityCleanWithConfigFile(t *testing.T) {
-	if !IsTestFunctionality() {
-		return
-	}
-	args := GetArgsForFunctionalTesting(
-		"",                         // driver path
-		"clean",                    // command
-		"",                         // location
-		ConfigFileOpt+"",           // command line args
-		getDefaultPluginUrl(),      // url
-		getDefaultPluginUser(),     //  user
-		getDefaultPluginPassword()) // password
-
-	args.IsDryRun = "TRUE"
-	fmt.Println(args.ToStr())
+		getDefaultPluginPassword(),
+	)
 
 	fp, err := Exec(context.TODO(), args)
 	if err != nil {
 		fmt.Println("Error in Exec: " + err.Error())
 		t.Fail()
 	}
-	_ = fp
-}
+	expectedCmd := " clean -cleanDisabled=false  -url=jdbc:mysql://3.4.9.2:3306/flyway_test " +
+		"-user=hnstest03 -password=sk89sl2@3 -locations=filesystem:/test/db-migrate01 "
 
-func TestFunctionalityBaseline(t *testing.T) {
-	if IsTestFunctionality() {
-		return
+	if fp.ExecCommand != expectedCmd {
+		t.Fail()
 	}
-
-}
-
-func TestFunctionalityMigrate(t *testing.T) {
-	if IsTestFunctionality() {
-		return
-	}
-}
-
-func TestFunctionalityRepair(t *testing.T) {
-	if IsTestFunctionality() {
-		return
-	}
-}
-
-func TestFunctionalityValidate(t *testing.T) {
-	if IsTestFunctionality() {
-		return
-	}
-}
-
-func TestUnitTcClean(t *testing.T) {
 }
 
 func TestUnitTcBaseline(t *testing.T) {
+	args := GetArgsForFunctionalTesting(
+		getDefaultPluginDriverPath(),
+		"baseline",
+		getDefaultPluginLocations(),
+		getDefaultPluginCommandLineArgs(),
+		getDefaultPluginUrl(),
+		getDefaultPluginUser(),
+		getDefaultPluginPassword(),
+	)
+
+	fp, err := Exec(context.TODO(), args)
+	if err != nil {
+		fmt.Println("Error in Exec: " + err.Error())
+		t.Fail()
+	}
+	expectedCmd := " baseline  -url=jdbc:mysql://3.4.9.2:3306/flyway_test" +
+		" -user=hnstest03 -password=sk89sl2@3 -locations=filesystem:/test/db-migrate01 "
+
+	if fp.ExecCommand != expectedCmd {
+		t.Fail()
+	}
 }
 
 func TestUnitTcMigrate(t *testing.T) {
+	args := GetArgsForFunctionalTesting(
+		getDefaultPluginDriverPath(),
+		"migrate",
+		getDefaultPluginLocations(),
+		getDefaultPluginCommandLineArgs(),
+		getDefaultPluginUrl(),
+		getDefaultPluginUser(),
+		getDefaultPluginPassword(),
+	)
+
+	fp, err := Exec(context.TODO(), args)
+	if err != nil {
+		fmt.Println("Error in Exec: " + err.Error())
+		t.Fail()
+	}
+	expectedCmd := " migrate  -url=jdbc:mysql://3.4.9.2:3306/flyway_test " +
+		"-user=hnstest03 -password=sk89sl2@3 -locations=filesystem:/test/db-migrate01 "
+
+	if fp.ExecCommand != expectedCmd {
+		fmt.Printf("|%s|", fp.ExecCommand)
+		t.Fail()
+	}
 }
 
 func TestUnitTcRepair(t *testing.T) {
+	args := GetArgsForFunctionalTesting(
+		getDefaultPluginDriverPath(),
+		"repair",
+		getDefaultPluginLocations(),
+		getDefaultPluginCommandLineArgs(),
+		getDefaultPluginUrl(),
+		getDefaultPluginUser(),
+		getDefaultPluginPassword(),
+	)
+
+	fp, err := Exec(context.TODO(), args)
+	if err != nil {
+		fmt.Println("Error in Exec: " + err.Error())
+		t.Fail()
+	}
+	expectedCmd := " repair  -url=jdbc:mysql://3.4.9.2:3306/flyway_test" +
+		" -user=hnstest03 -password=sk89sl2@3 -locations=filesystem:/test/db-migrate01 "
+
+	if fp.ExecCommand != expectedCmd {
+		t.Fail()
+	}
 }
 
 func TestUnitTcValidate(t *testing.T) {
+	args := GetArgsForFunctionalTesting(
+		getDefaultPluginDriverPath(),
+		"validate",
+		getDefaultPluginLocations(),
+		getDefaultPluginCommandLineArgs(),
+		getDefaultPluginUrl(),
+		getDefaultPluginUser(),
+		getDefaultPluginPassword(),
+	)
+
+	fp, err := Exec(context.TODO(), args)
+	if err != nil {
+		fmt.Println("Error in Exec: " + err.Error())
+		t.Fail()
+	}
+	expectedCmd := " validate  -url=jdbc:mysql://3.4.9.2:3306/flyway_test" +
+		" -user=hnstest03 -password=sk89sl2@3 -locations=filesystem:/test/db-migrate01 "
+
+	if fp.ExecCommand != expectedCmd {
+		fmt.Printf("|%s|", fp.ExecCommand)
+		t.Fail()
+	}
 }
 
 func GetArgsForFunctionalTesting(pluginDriverPath, pluginFlywayCommand, pluginLocations,
@@ -114,6 +145,7 @@ func GetArgsForFunctionalTesting(pluginDriverPath, pluginFlywayCommand, pluginLo
 			Url:             pluginUrl,
 			UserName:        pluginUser,
 			Password:        pluginPassword,
+			IsDryRun:        "TRUE",
 		},
 	}
 
@@ -129,7 +161,7 @@ func getDefaultPluginFlywayCommand() string {
 }
 
 func getDefaultPluginLocations() string {
-	return os.Getenv("PLUGIN_LOCATIONS")
+	return "filesystem:/test/db-migrate01"
 }
 
 func getDefaultPluginCommandLineArgs() string {
@@ -137,13 +169,13 @@ func getDefaultPluginCommandLineArgs() string {
 }
 
 func getDefaultPluginUrl() string {
-	return os.Getenv("PLUGIN_URL")
+	return "jdbc:mysql://3.4.9.2:3306/flyway_test"
 }
 
 func getDefaultPluginUser() string {
-	return os.Getenv("PLUGIN_USERNAME")
+	return "hnstest03"
 }
 
 func getDefaultPluginPassword() string {
-	return os.Getenv("PLUGIN_PASSWORD")
+	return "sk89sl2@3"
 }
