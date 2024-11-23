@@ -49,6 +49,7 @@ func (a *Args) ToStr() string {
 
 type ProcessingInfo struct {
 	ExecCommand         string
+	Env                 string
 	CommandSpecificArgs string
 }
 
@@ -127,11 +128,7 @@ func (p *FlywayPlugin) Run() error {
 	var err error
 
 	p.ExecCommand = p.GetExecArgsStr()
-
 	fmt.Println("Command: ", p.ExecCommand)
-	if p.InputArgs.IsDryRun == "TRUE" {
-		return nil
-	}
 
 	cmdParts := strings.Fields(p.ExecCommand)
 	if len(cmdParts) < 2 {
@@ -144,7 +141,12 @@ func (p *FlywayPlugin) Run() error {
 	cmd.Stdout = &stdoutBuf
 	cmd.Stderr = &stderrBuf
 	if len(p.InputArgs.DriverPath) > 0 {
+		p.Env = "CLASSPATH=" + p.InputArgs.DriverPath
 		cmd.Env = append(os.Environ(), "CLASSPATH="+p.InputArgs.DriverPath)
+	}
+
+	if p.InputArgs.IsDryRun == "TRUE" {
+		return nil
 	}
 
 	err = cmd.Run()

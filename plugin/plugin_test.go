@@ -72,7 +72,6 @@ func TestUnitTcMigrate(t *testing.T) {
 
 	fp, err := Exec(context.TODO(), args)
 	if err != nil {
-		fmt.Println("Error in Exec: " + err.Error())
 		t.Fail()
 	}
 	expectedCmd := " migrate  -url=jdbc:mysql://3.4.9.2:3306/flyway_test " +
@@ -97,7 +96,6 @@ func TestUnitTcRepair(t *testing.T) {
 
 	fp, err := Exec(context.TODO(), args)
 	if err != nil {
-		fmt.Println("Error in Exec: " + err.Error())
 		t.Fail()
 	}
 	expectedCmd := " repair  -url=jdbc:mysql://3.4.9.2:3306/flyway_test" +
@@ -128,7 +126,59 @@ func TestUnitTcValidate(t *testing.T) {
 		" -user=hnstest03 -password=sk89sl2@3 -locations=filesystem:/test/db-migrate01 "
 
 	if fp.ExecCommand != expectedCmd {
+		t.Fail()
+	}
+}
+
+func TestUnitTcWithConfigFiles(t *testing.T) {
+	args := GetArgsForFunctionalTesting(
+		getDefaultPluginDriverPath(),
+		"migrate",
+		"", // locations
+		getDefaultPluginCommandLineArgs(),
+		"", // url
+		"", // username
+		"", // password
+	)
+	args.CommandLineArgs = "-configFiles=/harness/hns/test-resources/flyway/config1/flyway.conf"
+
+	fp, err := Exec(context.TODO(), args)
+	if err != nil {
+		fmt.Println("Error in Exec: " + err.Error())
+		t.Fail()
+	}
+	expectedCmd := " migrate  -configFiles=/harness/hns/test-resources/flyway/config1/flyway.conf"
+
+	if fp.ExecCommand != expectedCmd {
 		fmt.Printf("|%s|", fp.ExecCommand)
+		t.Fail()
+	}
+}
+
+func TestUnitTcWithDriverPath(t *testing.T) {
+	args := GetArgsForFunctionalTesting(
+		"/harness/test/flyway-mysql-10.21.0.jar",
+		"clean",
+		"",
+		getDefaultPluginCommandLineArgs(),
+		getDefaultPluginUrl(),
+		getDefaultPluginUser(),
+		getDefaultPluginPassword(),
+	)
+
+	fp, err := Exec(context.TODO(), args)
+	if err != nil {
+		fmt.Println("Error in Exec: " + err.Error())
+		t.Fail()
+	}
+	expectedCmd := " clean -cleanDisabled=false  -url=jdbc:mysql://3.4.9.2:3306/flyway_test -user=hnstest03 -password=sk89sl2@3 "
+	fmt.Println(fp.Env)
+	if fp.ExecCommand != expectedCmd {
+		fmt.Printf("|%s|", fp.ExecCommand)
+		t.Fail()
+	}
+	expectedEnv := "CLASSPATH=/harness/test/flyway-mysql-10.21.0.jar"
+	if fp.Env != expectedEnv {
 		t.Fail()
 	}
 }
