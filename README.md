@@ -4,22 +4,35 @@ A plugin to Drone Flyway runner DB migration support plugin.
 
 The following settings changes this plugin's behavior.
 
-* param1 (optional) does something.
-* param2 (optional) does something different.
+| **Plugin parameter** | **Description**                                                                                                   |
+|------------------------|-------------------------------------------------------------------------------------------------------------------|
+| **driver_path**        | Path to JDBC driver jar files when user wants a specific set of drivers to be used. e.g "/path/to/driver1.jar:/path/to/driver2.jar" |
+| **flyway_command**     | The Flyway operation supports actions such as migrate, clean, baseline, or repair                                |
+| **locations**          | Specifies the path to the Flyway migration files. This is where Flyway looks for SQL scripts. e.g /opt/web-app-3/migrations |
+| **command_line_args**  | Additional arguments passed to Flyway. e.g “-Dflyway.schemas=public“ or “-X” etc …                                |
+| **url**                | JDBC connection URL for the target database. e.g for mysql jdbc:mysql://4.20.19.21:3306/flyway_test               |
+| **username**           | User name of the DB user                                                                                         |
+| **password**           | Password of the DB user                                                                                          |
+
+<br>
 
 Below is an example `.drone.yml` that uses this plugin.
 
 ```yaml
-kind: pipeline
-name: default
-
-steps:
-- name: run harnesscommunity/drone-flyway-runner plugin
-  image: harnesscommunity/drone-flyway-runner
-  pull: if-not-exists
-  settings:
-    param1: foo
-    param2: bar
+- step:
+    identifier: flywayrunner7f66cc
+    name: flywayrunner
+    spec:
+      image: plugins/drone-flyway-runner
+      settings:
+        command_line_args: -X
+        flyway_command: migrate
+        locations: /opt/hns/harness-plugins/flyway-test-files/migration_files
+        password: <+input>
+        url: jdbc:mysql://43.204.190.241:3306/flyway_test
+        username: <+input>
+    timeout: ""
+    type: Plugin
 ```
 
 # Building
@@ -33,7 +46,7 @@ scripts/build.sh
 Build the plugin image:
 
 ```text
-docker build -t harnesscommunity/drone-flyway-runner -f docker/Dockerfile .
+docker build -t plugins/drone-flyway-runner -f docker/Dockerfile .
 ```
 
 # Testing
@@ -49,7 +62,7 @@ docker run --rm -e \
   -e PLUGIN_PASSWORD=sksi$k89 \
   -e PLUGIN_URL=jdbc:mysql://23.12.7.8:3306/flyway_db \
   -e PLUGIN_LOCATIONS=/harness/db-migrations  
-  harnesscommunity/drone-flyway-runner
+  plugins/drone-flyway-runner
 ```
 ### Migrate command with config file example
 
@@ -70,7 +83,7 @@ docker run --rm -e \
   -e PLUGIN_URL=jdbc:mysql://23.12.7.8:3306/flyway_db \
   -e PLUGIN_LOCATIONS=/harness/db-migrations \
   -e PLUGIN_DRIVER_PATH=/harness/drivers/mysql-connector-java-8.0.23.jar \  
-  harnesscommunity/drone-flyway-runner
+  plugins/drone-flyway-runner
 ```
 
 ### Repair command with command line args example
