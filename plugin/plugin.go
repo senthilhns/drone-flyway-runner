@@ -16,7 +16,6 @@ import (
 )
 
 type Args struct {
-	//Pipeline
 	FlywayEnvPluginArgs
 	Level string `envconfig:"PLUGIN_LOG_LEVEL"`
 }
@@ -53,17 +52,10 @@ type ProcessingInfo struct {
 	CommandSpecificArgs string
 }
 
-func GetNewPlugin() (FlywayPlugin, error) {
-	return FlywayPlugin{}, nil
-}
-
 func Exec(ctx context.Context, args Args) (FlywayPlugin, error) {
-	plugin, err := GetNewPlugin()
-	if err != nil {
-		return plugin, err
-	}
+	plugin := FlywayPlugin{}
 
-	err = plugin.Init(&args)
+	err := plugin.Init(&args)
 	if err != nil {
 		return plugin, err
 	}

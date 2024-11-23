@@ -40,13 +40,47 @@ docker build -t harnesscommunity/drone-flyway-runner -f docker/Dockerfile .
 
 Execute the plugin from your current working directory:
 
-```text
-docker run --rm -e PLUGIN_PARAM1=foo -e PLUGIN_PARAM2=bar \
-  -e DRONE_COMMIT_SHA=8f51ad7884c5eb69c11d260a31da7a745e6b78e2 \
-  -e DRONE_COMMIT_BRANCH=master \
-  -e DRONE_BUILD_NUMBER=43 \
-  -e DRONE_BUILD_STATUS=success \
-  -w /drone/src \
-  -v $(pwd):/drone/src \
+### Migrate command example
+
+```bash
+docker run --rm -e \  
+  -e PLUGIN_FLYWAY_COMMAND=migrate \
+  -e PLUGIN_USERNAME=hns_usr \
+  -e PLUGIN_PASSWORD=sksi$k89 \
+  -e PLUGIN_URL=jdbc:mysql://23.12.7.8:3306/flyway_db \
+  -e PLUGIN_LOCATIONS=/harness/db-migrations  
   harnesscommunity/drone-flyway-runner
+```
+### Migrate command with config file example
+
+```bash
+docker run --rm -e \  
+  -e PLUGIN_FLYWAY_COMMAND=migrate \
+  -e PLUGIN_COMMAND_LINE_ARGS='-configFiles=/harness/hns/test-resources/flyway/config1/flyway.conf'
+
+```
+
+### Migrate command with JDBC driver example
+
+```bash
+docker run --rm -e \  
+  -e PLUGIN_FLYWAY_COMMAND=migrate \
+  -e PLUGIN_USERNAME=hns_usr \
+  -e PLUGIN_PASSWORD=sksi$k89 \
+  -e PLUGIN_URL=jdbc:mysql://23.12.7.8:3306/flyway_db \
+  -e PLUGIN_LOCATIONS=/harness/db-migrations \
+  -e PLUGIN_DRIVER_PATH=/harness/drivers/mysql-connector-java-8.0.23.jar \  
+  harnesscommunity/drone-flyway-runner
+```
+
+### Repair command with command line args example
+
+```bash
+docker run --rm -e \  
+  -e PLUGIN_FLYWAY_COMMAND=repair \
+  -e PLUGIN_USERNAME=hnstest03 \
+  -e PLUGIN_PASSWORD=3cbc98835323 \
+  -e PLUGIN_URL=jdbc:mysql://23.12.7.8:3306/flyway_db \
+  -e PLUGIN_LOCATIONS=/harness/db-migrations \
+  -e PLUGIN_COMMAND_LINE_ARGS='-connectRetries=3 -cleanDisabled=false -validateOnMigrate=true -baselineOnMigrate=true'
 ```
